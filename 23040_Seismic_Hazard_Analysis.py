@@ -3,9 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# =====================================================
-# 1. CREATE BASIC SYNTHETIC DATASET
-# =====================================================
 N = 1000
 
 df = pd.DataFrame({
@@ -23,9 +20,7 @@ df['PGA'] = np.exp(
 
 print("Nodes:", ['M','R','SD','Q0','kappa0','VS30','PGA'])
 
-# =====================================================
-# 2. DISCRETISATION
-# =====================================================
+
 def make_bins(x, bins):
     return pd.cut(x, bins=bins, labels=False, include_lowest=True)
 
@@ -35,9 +30,7 @@ df['PGA_d'] = make_bins(df['PGA'], 8)
 print("\nSample discretised values:")
 print(df[['M','M_d','PGA','PGA_d']].head())
 
-# =====================================================
-# 3. SIMPLE MTE-LIKE MODEL (exponential approx per M bin)
-# =====================================================
+
 def fit_simple_exp(x):
     x = np.array(x)
     if len(x) < 5:
@@ -54,9 +47,6 @@ for m_bin in df['M_d'].unique():
 print("\nFitted MTE models:")
 print(mte_models)
 
-# =====================================================
-# 4. PREDICT PGA USING MTE
-# =====================================================
 def predict_from_mte(m_bin):
     model = mte_models[m_bin]
     return model['a'] + 1/model['lambda']
@@ -66,13 +56,7 @@ df['PGA_pred'] = df['M_d'].apply(predict_from_mte)
 print("\nPredictions:")
 print(df[['M','PGA','PGA_pred']].head())
 
-# =====================================================
-# 5. VISUALIZATIONS
-# =====================================================
 
-# ----------------------------------------------
-# Plot 1: Actual vs Predicted PGA Scatter Plot
-# ----------------------------------------------
 plt.figure(figsize=(7,5))
 sns.scatterplot(x=df['PGA'], y=df['PGA_pred'], alpha=0.5)
 plt.xlabel("Actual PGA")
@@ -81,9 +65,7 @@ plt.title("Actual vs Predicted PGA")
 plt.grid(True)
 plt.show()
 
-# ----------------------------------------------
-# Plot 2: Histogram of PGA by Magnitude Bin
-# ----------------------------------------------
+
 plt.figure(figsize=(8,5))
 for m_bin in range(3):
     sns.kdeplot(df[df['M_d'] == m_bin]['PGA'], label=f"M_d = {m_bin}", fill=True)
@@ -94,9 +76,7 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# ----------------------------------------------
-# Plot 3: MTE Curve Example for a Single Bin
-# ----------------------------------------------
+
 example_bin = 1
 bin_data = df[df['M_d'] == example_bin]['PGA']
 
@@ -115,3 +95,4 @@ plt.ylabel("Density")
 plt.legend()
 plt.grid(True)
 plt.show()
+
